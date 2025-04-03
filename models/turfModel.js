@@ -23,6 +23,9 @@ const TurfSchema = new mongoose.Schema({
         ref: 'LocationMaster',// reference model name
         unique: true
 
+    },
+    description: {
+        type: String
     }
 
 })
