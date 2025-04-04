@@ -7,7 +7,9 @@ const { AddLocation, AddTurf, AddManager, getAllLocations,
     getAllManagers,
     getManager,
     editManager,
-    deleteManager
+    deleteManager,
+    getAllBookings,
+    getAllPayments
 } = require('../controllers/adminController');
 
 
@@ -26,6 +28,8 @@ adminRouter.get('/GetAllManagers', getAllManagers);
 adminRouter.get('/GetManager/:name', getManager);
 adminRouter.put('/EditManager/:id', editManager);
 adminRouter.delete('/DeleteManager/:id', deleteManager);
+adminRouter.get('/GetAllBookings', getAllBookings);
+adminRouter.get('/GetAllPayments', getAllPayments)
 
 
 module.exports = { adminRouter }

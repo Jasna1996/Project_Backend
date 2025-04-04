@@ -5,6 +5,8 @@ const managerModel = require('../models/locationManagerModel');
 const userModel = require('../models/userModel');
 const express = require('express');
 const locationManagerModel = require('../models/locationManagerModel');
+const bookingModel = require('../models/bookingModel');
+const paymentModel = require('../models/paymentModel')
 
 // *****Location Operations*****
 //Add Location
@@ -356,8 +358,34 @@ const deleteManager = async (req, res) => {
         res.status(500).json({ success: false, message: "Internal server error" });
     }
 }
+
 //-----------------------------------------------
 
+// Get all Bookings
+const getAllBookings = async (req, res) => {
+    try {
+        const bookings = await bookingModel.find()
+        res.status(200).json({ succuss: true, data: bookings })
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ succuss: false, message: error.message || "Error fetching bookings", });
+    }
+}
+//---------------------------------------------------------------
+// Get all Payments
+const getAllPayments = async (req, res) => {
+    try {
+        const payments = await paymentModel.find()
+        res.status(200).json({ succuss: true, data: payments })
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ succuss: false, message: error.message || "Error fetching bookings", });
+
+    }
+}
+
+//---------------------------------------------------------------
 module.exports = {
     AddTurf,
     AddLocation,
@@ -374,5 +402,6 @@ module.exports = {
     getAllManagers,
     getManager,
     deleteManager,
-
+    getAllBookings,
+    getAllPayments
 }
