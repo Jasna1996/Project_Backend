@@ -6,6 +6,8 @@ require("dotenv").config();
 const { userRouter } = require('./routes/userRoutes');
 const { adminRouter } = require('./routes/adminRoutes');
 const { managerRouter } = require('./routes/managerRoutes');
+const turfRouter = require('./routes/TurfRoutes');
+
 
 
 const app = express(); // initialise Express application
@@ -22,6 +24,8 @@ app.get("/", (req, res) => {
 app.use("/user", userRouter);
 app.use("/admin", adminRouter);
 app.use("/manager", managerRouter);
+app.use("/turf", turfRouter);
+
 
 app.listen(process.env.PORT, () => {
     console.log(`server starts at port ${process.env.PORT}`);

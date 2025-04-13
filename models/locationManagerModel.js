@@ -5,7 +5,8 @@ const LocationManagerSchema = new mongoose.Schema({
     location_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'LocationMaster',
-        required: true
+        required: true,
+        unique: true
     },
     user_id: {
         type: mongoose.Schema.Types.ObjectId,
