@@ -154,6 +154,25 @@ const getTurf = async (req, res) => {
     }
 }
 
+//Get all turfs based on location id
+const getTurfByLocation = async (req, res) => {
+    try {
+        const { locationId } = req.query;
+        if (!locationId) {
+            return res.status(400).json({ success: false, message: "Location ID is required" });
+        }
+
+        const turfs = await turfModel.find({ locationId })
+        return res.status(200).json({
+            success: true,
+            message: "Turfs retrieved successfully",
+            data: turfs
+        });
+    } catch (error) {
+        console.error("Error fetching turfs by location:", error);
+        res.status(500).json({ success: false, message: "Error retrieving turfs" });
+    }
+}
 
 
 module.exports = {
@@ -161,5 +180,6 @@ module.exports = {
     editTurf,
     deleteTurf,
     getAllTurfs,
-    getTurf
+    getTurf,
+    getTurfByLocation
 }
