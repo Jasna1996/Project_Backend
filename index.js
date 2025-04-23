@@ -2,11 +2,9 @@
 const express = require('express');
 const { dbConnection } = require('./config/dbConnection');
 require("dotenv").config();
-
-const { userRouter } = require('./routes/userRoutes');
-const { adminRouter } = require('./routes/adminRoutes');
-const { managerRouter } = require('./routes/managerRoutes');
-const turfRouter = require('./routes/TurfRoutes');
+// const { adminRouter } = require('./routes/v1Routes/adminRoutes');
+// const { managerRouter } = require('./routes/managerRoutes');
+// const turfRouter = require('./routes/TurfRoutes');
 const apiRouter = require('./routes/indexRoute');
 
 
@@ -23,10 +21,6 @@ app.get("/", (req, res) => {
 })
 
 app.use("/api", apiRouter);
-app.use("/user", userRouter);
-app.use("/admin", adminRouter);
-app.use("/manager", managerRouter);
-app.use("/turf", turfRouter);
 
 
 app.listen(process.env.PORT, () => {

@@ -8,9 +8,9 @@ const { AddManager,
     deleteManager,
     getAllBookings,
     getAllPayments
-} = require('../controllers/adminController');
+} = require('../../controllers/adminController');
 const { AddLocation, getAllLocations, getLocation, editLocation, deleteLocation }
-    = require('../controllers/locationMasterController');
+    = require('../../controllers/locationMasterController');
 
 
 adminRouter.post('/AddLocation', AddLocation);
