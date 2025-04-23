@@ -2,11 +2,9 @@
 const express = require('express');
 const { dbConnection } = require('./config/dbConnection');
 require("dotenv").config();
-// const { adminRouter } = require('./routes/v1Routes/adminRoutes');
-// const { managerRouter } = require('./routes/managerRoutes');
-// const turfRouter = require('./routes/TurfRoutes');
 const apiRouter = require('./routes/indexRoute');
-
+const cors = require('cors');
+const cookieparser = require('cookie-parser');
 
 
 const app = express(); // initialise Express application
@@ -15,6 +13,11 @@ dbConnection(); // db connection
 
 
 app.use(express.json());
+app.use(cookieparser());
+app.use(cors({
+    origin: 'http://localhost:5173',
+    credentials: true
+}))
 
 app.get("/", (req, res) => {
     res.json("Server started")
