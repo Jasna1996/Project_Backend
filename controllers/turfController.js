@@ -2,7 +2,8 @@ const mongoose = require('mongoose');
 const turfModel = require('../models/turfModel');
 const { cloudinary } = require('../config/clodinaryConfig');
 const { uploadToCloudinary } = require('../utilities/imageUploader');
-const locationMasterModel = require('../models/locationMasterModel')
+const locationMasterModel = require('../models/locationMasterModel');
+const ObjectId = mongoose.Types.ObjectId;
 
 // Adding Turf
 
@@ -157,12 +158,14 @@ const getTurf = async (req, res) => {
 //Get all turfs based on location id
 const getTurfByLocation = async (req, res) => {
     try {
-        const { locationId } = req.query;
-        if (!locationId) {
+        const { location_Id } = req.query;
+
+        if (!location_Id) {
             return res.status(400).json({ success: false, message: "Location ID is required" });
         }
 
-        const turfs = await turfModel.find({ locationId })
+        const turfs = await turfModel.find({ location_id: new ObjectId(location_Id) });
+
         return res.status(200).json({
             success: true,
             message: "Turfs retrieved successfully",
