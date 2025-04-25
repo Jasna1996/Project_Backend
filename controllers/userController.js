@@ -10,15 +10,20 @@ const paymentModel = require('../models/paymentModel');
 const signUp = async (req, res) => {
 
     try {
-        const { name, email, phone, password } = req.body;
+        const { name, email, phone, password, confirmPassword } = req.body;
 
-        if (!name || !email || !phone || !password) {
+        if (!name || !email || !phone || !password || !confirmPassword) {
             return res.status(400).json({ message: "All fields are required!" })
         }
 
+        if (password !== confirmPassword) {
+            return res.status(400).json({message:"Passwords do not match!"});
+           
+        }
         const userExist = await users.findOne({ email });
         if (userExist)
             return res.status(400).json({ message: "user already exist" })
+
 
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt)
@@ -29,6 +34,7 @@ const signUp = async (req, res) => {
 
     } catch (error) {
         console.log(error);
+        const errorMessage = error?.response?.data?.message || "Something went wrong!";
         res.status(error.status || 500).json({ message: error.message || "Error registering user" });
     }
 }
