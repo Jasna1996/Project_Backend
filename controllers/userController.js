@@ -65,6 +65,7 @@ const login = async (req, res) => {
         delete userObject.password;
 
         const token = createToken(lUser._id)
+        res.cookie("token",token)
         console.log("Login successful for user:", {
             userId: lUser._id,
             email: lUser.email,
@@ -248,6 +249,16 @@ const payment = async (req, res) => {
         res.status(500).json({ success: false, message: "Internal server error" });
     }
 }
+
+const logout=(req,res)=>{
+    try {
+        res.clearCookie("token");
+        res.status(200).json({message:"Logged out"})
+    } catch (error) {
+        console.error("Logout Error:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+    }
+}
 module.exports = {
     signUp,
     login,
@@ -255,5 +266,6 @@ module.exports = {
     deleteUser,
     UserProfile,
     bookings,
-    payment
+    payment,
+    logout
 } 
