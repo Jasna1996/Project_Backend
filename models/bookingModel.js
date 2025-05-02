@@ -9,12 +9,13 @@ const BookingSchema = new mongoose.Schema({
     booking_Status: { type: String },
     user_id: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'user'//refered from user model
+        ref: 'user',//refered from user model
+        required: true
     },
     turf_id: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Turf'
+        ref: 'Turf',
+        required: true
     }
 })
-
 module.exports = new mongoose.model('booking', BookingSchema);

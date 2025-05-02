@@ -10,10 +10,17 @@ const TurfSchema = new mongoose.Schema({
     image: {
         type: String,
     },
-    pricePerHead: {
-        type: Number,
+    sport: {
+        type: String,
+        enum: ['football', 'cricket'],
         required: true
     },
+    pricePerHour: {
+        type: Map,
+        of: Number,
+        required: true
+    },
+
     ratings: {
         type: Number,
         default: 0

@@ -4,7 +4,6 @@ const bcrypt = require('bcryptjs');
 const { createToken } = require('../utilities/generateToken');
 const turfModel = require('../models/turfModel')
 const bookingModel = require('../models/bookingModel')
-const paymentModel = require('../models/paymentModel');
 
 // USER FUNCTIONS
 const signUp = async (req, res) => {
@@ -17,8 +16,8 @@ const signUp = async (req, res) => {
         }
 
         if (password !== confirmPassword) {
-            return res.status(400).json({message:"Passwords do not match!"});
-           
+            return res.status(400).json({ message: "Passwords do not match!" });
+
         }
         const userExist = await users.findOne({ email });
         if (userExist)
@@ -65,7 +64,7 @@ const login = async (req, res) => {
         delete userObject.password;
 
         const token = createToken(lUser._id)
-        res.cookie("token",token)
+        res.cookie("token", token)
         console.log("Login successful for user:", {
             userId: lUser._id,
             email: lUser.email,
@@ -164,96 +163,74 @@ const deleteUser = async (req, res) => {
 };
 
 //BOOKING FUNCTIONS
+
 const bookings = async (req, res) => {
     try {
-        const { date, time_From, time_To, email, turfName } = req.body;
+        const { email, date, time_From, time_To, turfName, turfId } = req.body;
 
         if (!date || !time_From || !time_To || !turfName || !email)
-            return res.status(400).json({ success: false, message: "date ,time from and to,email and turf are required" })
+            return res.status(400).json({ success: false, message: "Date, time from, time to, email and turf are required" });
 
-        // Convert date and time into full Date objects
-        const parseDateTime = (date, time) => {
-            return new Date(`${date} ${time}`);
-        };
+        const parseDateTime = (date, time) => new Date(`${date} ${time}`);
 
-        // Convert date and time strings into Date objects
         const parsedDate = new Date(date);
         const parsedTimeFrom = parseDateTime(date, time_From);
         const parsedTimeTo = parseDateTime(date, time_To);
 
-        // Check if date conversion is valid
         if (isNaN(parsedDate) || isNaN(parsedTimeFrom) || isNaN(parsedTimeTo)) {
             return res.status(400).json({ success: false, message: "Invalid date or time format" });
         }
 
-        //find turf
-        const turfData = await turfModel.findOne({
-            name: { $regex: new RegExp(`^${turfName.trim()}$`, 'i') }
-        })
-        if (!turfData)
-            return res.status(404).json({ success: false, message: "Turf not found" })
-        // Find the user by email
         const userData = await users.findOne({ email: email.trim() });
         if (!userData) {
             return res.status(404).json({ success: false, message: "User not found" });
         }
 
+        const turfData = await turfModel.findById(turfId);
+        if (!turfData) {
+            return res.status(404).json({ success: false, message: "Turf not found" });
+        }
+
+        const existingBooking = await bookingModel.findOne({
+            user_id: userData._id,
+            turf_id: turfData._id,
+            date: parsedDate,
+            time_From: parsedTimeFrom,
+            time_To: parsedTimeTo
+        });
+
+        if (existingBooking) {
+            return res.status(400).json({ success: false, message: "Booking already exists for this time slot" });
+        }
+
         const newBooking = new bookingModel({
-            date: parsedDate, time_From: parsedTimeFrom,
+            date: parsedDate,
+            time_From: parsedTimeFrom,
             time_To: parsedTimeTo,
             user_id: userData._id,
             turf_id: turfData._id
-        })
+        });
+
         const saveBooking = await newBooking.save();
         return res.status(201).json({
             success: true,
-            message: "Booking successful", data: saveBooking
-        })
+            message: "Booking successful",
+            data: saveBooking
+        });
 
     } catch (error) {
         console.error("Booking error:", error);
         return res.status(500).json({ success: false, message: error.message || "Failed to book" });
     }
-}
+};
 
-//PAYMENT FUNCTIONS
-const payment = async (req, res) => {
-    try {
-        const { email, amount, payment_method, payment_status, transaction_id, booking_id } = req.body;
-        const userData = await users.findOne({ email: email.trim() });
 
-        if (!userData) {
-            return res.status(404).json({ success: false, message: "User not found" });
-        }
-        //checking if booking exist
-        const bookingData = await bookingModel.findById(booking_id)
 
-        if (!bookingData)
-            return res.status(404).json({ success: false, message: "Booking not found" });
 
-        const newPayment = new paymentModel(
-            {
-                booking_id: bookingData._id,
-                user_id: userData._id, amount, payment_method, payment_status, transaction_id,
-
-            });
-
-        const savePayment = await newPayment.save();
-
-        res.status(201).json({
-            success: true, message: "Payment recorded successfully",
-            data: savePayment
-        });
-    } catch (error) {
-        console.error("Payment Error:", error);
-        res.status(500).json({ success: false, message: "Internal server error" });
-    }
-}
-
-const logout=(req,res)=>{
+const logout = (req, res) => {
     try {
         res.clearCookie("token");
-        res.status(200).json({message:"Logged out"})
+        res.status(200).json({ message: "Logged out" })
     } catch (error) {
         console.error("Logout Error:", error);
         res.status(500).json({ success: false, message: "Internal server error" });
@@ -266,6 +243,5 @@ module.exports = {
     deleteUser,
     UserProfile,
     bookings,
-    payment,
     logout
 } 
