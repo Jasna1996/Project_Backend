@@ -5,6 +5,7 @@ const { createToken } = require('../utilities/generateToken');
 const turfModel = require('../models/turfModel')
 const bookingModel = require('../models/bookingModel')
 
+
 // USER FUNCTIONS
 const signUp = async (req, res) => {
 
@@ -41,6 +42,7 @@ const signUp = async (req, res) => {
 const login = async (req, res) => {
 
     try {
+        const { role } = req.query;
         const { email, phone, password } = req.body;
 
         if (!email && !phone) {
@@ -49,7 +51,8 @@ const login = async (req, res) => {
         const lUser = await users.findOne({
             $or: [
                 { email: email || '' },
-                { phone: phone || '' }
+                { phone: phone || '' },
+                { role: role || '' }
             ]
         }).exec();
 
@@ -224,7 +227,34 @@ const bookings = async (req, res) => {
     }
 };
 
+const getUserBookings = async (req, res) => {
+    try {
+        const { userId } = req.query;
+        if (!userId) return res.status(400).json({ success: false, message: "User ID is required" });
 
+        const bookings = await bookingModel.find({ user_id: userId })
+            .sort({ date: -1 })
+            .populate("turf_id", "name location");
+        res.status(200).json({ success: true, bookings });
+    } catch (err) {
+        console.error("Error fetching bookings:", err);
+        res.status(500).json({ success: false, message: "Server error" });
+    }
+};
+
+const cancelBooking = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const booking = await bookingModel.findByIdAndDelete(id).exec();
+        if (!booking) {
+            return res.status(404).json({ success: false, message: 'Booking not found' });
+        }
+        res.status(200).json({ success: true, message: 'Booking canceled successfully' });
+    } catch (error) {
+        console.error('Error canceling booking:', err);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+}
 
 
 const logout = (req, res) => {
@@ -243,5 +273,7 @@ module.exports = {
     deleteUser,
     UserProfile,
     bookings,
-    logout
+    logout,
+    getUserBookings,
+    cancelBooking
 } 
