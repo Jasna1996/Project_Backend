@@ -17,7 +17,8 @@ app.use(cookieparser());
 app.use(cors({
     origin: 'https://turfbooking-frontend.vercel.app',
     credentials: true,
-    methods: ['get', 'post', 'delete', 'put', 'option']
+    methods: ['get', 'post', 'delete', 'put'],
+    origin: "*",
 
 }))
 
