@@ -18,7 +18,7 @@ app.use(cors({
     origin: 'https://turfbooking-frontend.vercel.app',
     credentials: true,
     methods: ['get', 'post', 'delete', 'put'],
-    origin: "*",
+    allowedHeaders: ['Access-Control-Allow-Origin','*']
 
 }))
 
