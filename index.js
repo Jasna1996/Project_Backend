@@ -16,11 +16,6 @@ dbConnection(); // db connection
 app.use(express.json());
 app.use(cookieparser());
 
-// app.use(cors({
-//     origin: 'https://turfbooking-frontend.vercel.app',
-//     credentials: true,
-//     methods: ['GET', 'POST', 'PUT', 'DELETE'],
-// }))
 app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', 'https://turfbooking-frontend.vercel.app');
     res.header('Access-Control-Allow-Credentials', 'true');
