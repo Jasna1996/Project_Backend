@@ -11,6 +11,7 @@ const { AddManager,
 } = require('../../controllers/adminController');
 const { AddLocation, getAllLocations, getLocation, editLocation, deleteLocation }
     = require('../../controllers/locationMasterController');
+const { getAllUsers } = require('../../controllers/userController');
 
 
 adminRouter.post('/AddLocation', AddLocation);
@@ -24,7 +25,8 @@ adminRouter.get('/GetManager/:name', getManager);
 adminRouter.put('/EditManager/:id', editManager);
 adminRouter.delete('/DeleteManager/:id', deleteManager);
 adminRouter.get('/GetAllBookings', getAllBookings);
-adminRouter.get('/GetAllPayments', getAllPayments)
+adminRouter.get('/GetAllPayments', getAllPayments);
+adminRouter.get('/GetAllUsers', getAllUsers)
 
 
 module.exports = { adminRouter }

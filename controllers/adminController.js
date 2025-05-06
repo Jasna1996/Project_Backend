@@ -103,7 +103,8 @@ const editManager = async (req, res) => {
 // Get all managers
 const getAllManagers = async (req, res) => {
     try {
-        const managers = await managerModel.find();
+        const managers = await managerModel.find().populate('user_id', 'email')
+            .populate('location_id', 'name');
         if (!managers.length) {
             return res.status(404).json({ success: false, message: "Managers are not found" })
         }
@@ -137,7 +138,7 @@ const getManager = async (req, res) => {
 // Delete Manager
 const deleteManager = async (req, res) => {
     try {
-        const { id } = req.params.id;
+        const { id } = req.params;
         const manager = await locationManagerModel.findById(id);
         if (!manager) {
             return res.status(404).json({ success: false, message: "Location manager not found" });
@@ -155,7 +156,7 @@ const deleteManager = async (req, res) => {
 // Get all Bookings
 const getAllBookings = async (req, res) => {
     try {
-        const bookings = await bookingModel.find()
+        const bookings = await bookingModel.find().populate('user_id', 'email').populate('turf_id', 'name');
         res.status(200).json({ succuss: true, data: bookings })
     } catch (error) {
         console.log(error);
@@ -166,7 +167,8 @@ const getAllBookings = async (req, res) => {
 // Get all Payments
 const getAllPayments = async (req, res) => {
     try {
-        const payments = await paymentModel.find()
+        const payments = await paymentModel.find().populate('user_id', 'name email')
+            .populate('booking_id');
         res.status(200).json({ succuss: true, data: payments })
 
     } catch (error) {

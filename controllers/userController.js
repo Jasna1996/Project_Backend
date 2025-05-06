@@ -165,6 +165,22 @@ const deleteUser = async (req, res) => {
     }
 };
 
+
+const getAllUsers = async (req, res) => {
+    try {
+        const userList = await users.find();
+        if (!userList.length) {
+            return res.status(404).json({ message: "No users found" });
+        }
+
+        return res.status(200).json({ message: "Users retrieved successfully", users: userList });
+
+    } catch (error) {
+        console.error("Error fetching users:", error);
+        res.status(500).json({ message: "Error retrieving users" });
+    }
+};
+
 //BOOKING FUNCTIONS
 
 const bookings = async (req, res) => {
@@ -199,7 +215,8 @@ const bookings = async (req, res) => {
             turf_id: turfData._id,
             date: parsedDate,
             time_From: parsedTimeFrom,
-            time_To: parsedTimeTo
+            time_To: parsedTimeTo,
+
         });
 
         if (existingBooking) {
@@ -211,7 +228,9 @@ const bookings = async (req, res) => {
             time_From: parsedTimeFrom,
             time_To: parsedTimeTo,
             user_id: userData._id,
-            turf_id: turfData._id
+            turf_id: turfData._id,
+            booking_Status: "Booked",
+            total_Amount: req.body.priceEstimate
         });
 
         const saveBooking = await newBooking.save();
@@ -275,5 +294,6 @@ module.exports = {
     bookings,
     logout,
     getUserBookings,
-    cancelBooking
+    cancelBooking,
+    getAllUsers
 } 
