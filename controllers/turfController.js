@@ -9,54 +9,63 @@ const ObjectId = mongoose.Types.ObjectId;
 
 const AddTurf = async (req, res) => {
     try {
-
-        const locationName = req.body.locationName.trim();
-        const { name, pricePerHead, ratings, description } = req.body;
-
-        if (!name?.trim() || !pricePerHead || !locationName?.trim())
-            return res.status(400).json({ success: false, message: "Name, pricePerHead and locationName are required" })
-
-
-        if (!req.file) {
-            return res.status(400).json({ success: false, message: "Image not found" })
-
+        if (!req.body.name || !req.body.name.trim()) {
+            return res.status(400).json({ success: false, message: "Name is required" });
         }
 
-        // find location by name in case sensitive search
-        const findLocation = await locationMasterModel.findOne({
-            name: { $regex: new RegExp(`^${locationName.trim()}$`, 'i') }
-        })
+        if (!req.body.locationName || !req.body.locationName.trim()) {
+            return res.status(400).json({ success: false, message: "Location name is required" });
+        }
 
-        if (!findLocation)
-            return res.status(404).json({ success: false, message: "Location not found" })
+        const locationName = req.body.locationName.trim();
+        const { name, sport, pricePerHour: rawPricePerHour, ratings, description, locationId } = req.body;
 
-        const existingTurf = await turfModel.findOne({ name: name.trim(), location_id: findLocation._id });
+        const pricePerHour = typeof rawPricePerHour === "string" ? JSON.parse(rawPricePerHour) : rawPricePerHour;
+
+        if (!name?.trim() || !pricePerHour || !locationName)
+            return res.status(400).json({ success: false, message: "Name, pricePerHour and locationName are required" });
+
+        if (!req.file) {
+            return res.status(400).json({ success: false, message: "Image not found" });
+        }
+
+        const findLocation = await locationMasterModel.findById(locationId);
+        if (!findLocation) {
+            return res.status(404).json({ success: false, message: "Location not found" });
+        }
+
+        const existingTurf = await turfModel.findOne({ name: name.trim(), location_id: locationId });
         if (existingTurf) {
             return res.status(409).json({
                 success: false,
                 message: 'Turf with this name already exists'
             });
         }
+
         const cloudinaryRes = await uploadToCloudinary(req.file.path);
 
-        const newTurf = new turfModel({ name, pricePerHead, ratings: ratings || 0, location_id: findLocation._id, description, image: cloudinaryRes, });
+        const newTurf = new turfModel({
+            name: name.trim(),
+            sport,
+            pricePerHour,
+            ratings: ratings || 0,
+            location_id: locationId,
+            description,
+            image: cloudinaryRes,
+        });
 
-        let saveTurf = await newTurf.save();
-
-        // populate location details in response
+        const saveTurf = await newTurf.save();
 
         const result = await turfModel.findById(saveTurf._id).populate('location_id', 'name address');
-
 
         res.status(201).json({ success: true, message: "Turf added successfully", data: result });
 
     } catch (error) {
-        console.error('Error adding turf: ', error)
-        // handle duplicate turf name error
+        console.error('Error adding turf: ', error);
         if (error.code === '11000') {
             return res.status(400).json({ success: false, message: 'Turf with this name already exists' });
         }
-        return res.status(500).json({ success: false, message: error.message || "Failed to add turf " });
+        return res.status(500).json({ success: false, message: error.message || "Failed to add turf" });
     }
 }
 //Edit Turf
@@ -65,14 +74,23 @@ const editTurf = async (req, res) => {
         const turf_id = req.params.id
         const locationName = req.body.locationName?.trim() || null;
 
-        const { name, pricePerHead, ratings, description } = req.body;
-        const updateFields = { name, pricePerHead, ratings, description };
+        const { name, pricePerHour, ratings, description, sport } = req.body;
+
+        let parsedPricePerHour = pricePerHour;
+
+        if (typeof pricePerHour === "string") {
+            try {
+                parsedPricePerHour = JSON.parse(pricePerHour);
+            } catch (err) {
+                return res.status(400).json({ success: false, message: "Invalid pricePerHour format" });
+            }
+        }
+        const updateFields = { name, pricePerHour: parsedPricePerHour, ratings, description, sport };
 
         if (locationName) {
             const findLocation = await locationMasterModel.findOne({
                 name: { $regex: new RegExp(`^${locationName}$`, 'i') }
             });
-            console.log(findLocation, "find loc");
 
             if (!findLocation) {
                 return res.status(404).json({ success: false, message: "Location not found" });
@@ -125,7 +143,7 @@ const deleteTurf = async (req, res) => {
 // Get all turf
 const getAllTurfs = async (req, res) => {
     try {
-        const turfs = await turfModel.find();
+        const turfs = await turfModel.find().populate('location_id', 'name address');
         if (!turfs.length) {
             return res.status(404).json({ success: false, message: "No turfs found" })
         }
