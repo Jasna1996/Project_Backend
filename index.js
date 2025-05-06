@@ -19,8 +19,7 @@ app.use(cors({
     origin: 'https://turfbooking-frontend.vercel.app',
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Access-Control-Allow-Origin','*']
-
+    allowedHeaders: ['Content-Type', 'Authorization']
 }))
 
 app.use(express.json());
@@ -36,5 +35,5 @@ app.listen(process.env.PORT, () => {
     console.log(`server starts at port ${process.env.PORT}`);
 })
 
-module.exports =  app ;
+module.exports = app;
 module.exports.handler = serverless(app);
