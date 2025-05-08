@@ -5,9 +5,9 @@ module.exports = (req, res, next) => {
     try {
 
         console.log("Headers", req.headers)
-        const { token } = req.cookies.token || req.headers.authorization?.split(" ")[1];
+        const { token } = req.headers.authorization?.split(" ")[1];
         if (!token) {
-            return res.status(401).json({ error: 'jwt not found', req })
+            return res.status(401).json({ error: req.headers.authorization })
         }
         const verifiedToken = jwt.verify(token, process.env.JWT_SECRET)
         if (!verifiedToken) {
