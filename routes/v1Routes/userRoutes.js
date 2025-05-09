@@ -9,7 +9,7 @@ userRouter.post("/login", login);
 userRouter.get("/profile", authentication, UserProfile);
 userRouter.patch("/update", authentication, updateUser);
 userRouter.delete("/delete/:userId", authentication, deleteUser);
-userRouter.post("/booking", authentication, bookings);
+userRouter.post("/booking", bookings);
 userRouter.get("/getBookings", authentication, getUserBookings);
 userRouter.delete("/cancelBooking/:id", authentication, cancelBooking)
 userRouter.post("/logout", logout);
