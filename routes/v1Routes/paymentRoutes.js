@@ -5,7 +5,7 @@ const authentication = require('../../middleware/authentication');
 const paymentRouter = require('express').Router();
 
 
-paymentRouter.post("/makepayment", authentication, payment)
+paymentRouter.post("/makepayment", payment)
 
 
 module.exports = paymentRouter
