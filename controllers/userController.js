@@ -42,7 +42,7 @@ const signUp = async (req, res) => {
 const login = async (req, res) => {
 
     try {
-        const { role } = req.query;
+
         const { email, phone, password } = req.body;
 
         if (!email && !phone) {
@@ -51,8 +51,8 @@ const login = async (req, res) => {
         const lUser = await users.findOne({
             $or: [
                 { email: email || '' },
-                { phone: phone || '' },
-                { role: role || '' }
+                { phone: phone || '' }
+
             ]
         }).exec();
 
@@ -66,7 +66,9 @@ const login = async (req, res) => {
         const userObject = lUser.toObject();
         delete userObject.password;
 
-        const token = createToken(lUser._id)
+        // Include role in token
+        const token = createToken(lUser._id, lUser.role)
+
         res.cookie("token", token)
         console.log("Login successful for user:", {
             userId: lUser._id,
