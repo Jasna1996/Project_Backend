@@ -12,7 +12,7 @@ const payment = async (req, res) => {
         const { bookings } = req.body;
         const lineItems = [];
         for (const booking of bookings) {
-            const { turfId, time_From, time_To } = booking;
+            const { turfId, time_From, time_To, priceEstimate } = booking;
 
             const turf = await turfModel.findById(turfId);
             if (!turf) {
@@ -22,8 +22,8 @@ const payment = async (req, res) => {
             const toHour = parseInt(time_To.split(':')[0]);
             const duration = toHour - fromHour;
 
-            let ratePerHour = turf.sport === 'football' ? 1500 : 2500; // Example rates
-            let totalAmount = ratePerHour * duration * 100; // Stripe expects amount in paise
+
+            let totalAmount = Math.round(priceEstimate * 100);
 
 
             lineItems.push({
