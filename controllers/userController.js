@@ -192,7 +192,13 @@ const bookings = async (req, res) => {
         if (!date || !time_From || !time_To || !turfName || !email)
             return res.status(400).json({ success: false, message: "Date, time from, time to, email and turf are required" });
 
-        const parseDateTime = (date, time) => new Date(`${date} ${time}`);
+        const parseDateTime = (date, time) => {
+            const [hours, minutes] = time.split(":").map(Number);
+            const dateObj = new Date(date);
+
+            dateObj.setHours(hours - 5, minutes - 30);
+            return dateObj;
+        };
 
         const parsedDate = new Date(date);
         const parsedTimeFrom = parseDateTime(date, time_From);
@@ -256,7 +262,28 @@ const getUserBookings = async (req, res) => {
         const bookings = await bookingModel.find({ user_id: userId })
             .sort({ date: -1 })
             .populate("turf_id", "name location");
-        res.status(200).json({ success: true, bookings });
+
+        //formating the time before sending to frontrend
+        const formattedBookings = bookings.map(booking => {
+            const formatTime = (date) => {
+                if (!date) return 'N/A';
+                const d = new Date(date);
+                d.setHours(d.getHours() + 5, d.getMinutes() + 30);
+                return d.toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit', hour12: true });
+            }
+
+            return {
+                ...bookings._doc,
+                formattedDate: new Date(booking.date).toLocaleDateString('en-IN'),
+                formattedTimeFrom: formatTime(booking.time_From),
+                formattedTimeTo: formatTime(booking.time_To),
+            };
+        });
+
+        res.status(200).json({
+            success: true,
+            bookings: formattedBookings
+        });
     } catch (err) {
         console.error("Error fetching bookings:", err);
         res.status(500).json({ success: false, message: "Server error" });
