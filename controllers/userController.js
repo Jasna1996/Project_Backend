@@ -196,7 +196,7 @@ const bookings = async (req, res) => {
         const parseDateTime = (date, timeStr) => {
             console.log(`Parsing time: ${timeStr}`);
             const [time, period] = timeStr.split(' ');
-            const [hours, minutes] = time.split(":").map(Number);
+            let [hours, minutes] = time.split(":").map(Number);
 
             // Convert to 24-hour format
             if (period === 'PM' && hours !== 12) hours += 12;
@@ -218,7 +218,7 @@ const bookings = async (req, res) => {
             timeTo: parsedTimeTo
         });
 
-        if (isNaN(parsedDate) || isNaN(parsedTimeFrom) || isNaN(parsedTimeTo)) {
+        if (isNaN(parsedDate.getTime()) || isNaN(parsedTimeFrom.getTime()) || isNaN(parsedTimeTo.getTime())) {
             return res.status(400).json({ success: false, message: "Invalid date or time format" });
         }
 
