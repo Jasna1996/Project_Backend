@@ -37,8 +37,6 @@ const AddManager = async (req, res) => {
                 success: false, message: "This user is already a manager for this location",
             });
 
-        // Update user role to 'manager'
-        await userModel.findByIdAndUpdate(user._id, { role: 'manager' })
 
         const newManager = await managerModel({ location_id: findLocation._id, user_id: user._id });
         const savedManager = await newManager.save();
@@ -85,14 +83,6 @@ const editManager = async (req, res) => {
                 success: false, message: "This user is already assigned as the manager for this location"
             });
         }
-
-        // Update roles:
-        //  Set previous manager's role back to 'user'
-        await userModel.findByIdAndUpdate(existingManager.user_id, { role: 'user' });
-
-        //  Set new manager's role to 'manager'
-        await userModel.findByIdAndUpdate(newUser._id, { role: 'manager' });
-
 
         existingManager.user_id = newUser._id;
         const updatedManager = await existingManager.save()
