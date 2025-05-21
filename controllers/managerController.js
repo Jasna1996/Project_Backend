@@ -10,9 +10,9 @@ const locationManagerModel = require('../models/locationManagerModel')
 const getAllTurfs = async (req, res) => {
     try {
         const userId = req.user._id;
-        const assignedLocations = await locationManagerModel.find({ user_id: userId })
+        const assignedLocations = await locationManagerModel.find({ user_id: userId }).populate('location_id');
         //const assignedManager = await locationManagerModel.findOne({ user_id: userId })
-        if (!assignedLocations || assignedLocations.length === 0) {
+        if (!assignedLocations) {
             return res.status(403).json({
                 success: false, message: "Access denied. You are not assigned as a manager to any location."
             });
@@ -20,10 +20,13 @@ const getAllTurfs = async (req, res) => {
         //Extract all assigned location IDs
         const locationIds = assignedLocations.map(loc => loc.location_id);
 
-        // Get all turfs under those locations
-        const turf = await turfModel.find({ location_id: { $in: locationIds } });
+        // Get  turf under those locations
+        const turf = await turfModel.findOne({ location_id: assignedLocations.location_id._id })
+            .populate('location_id', 'name address');
         console.log("Fetched Turfs:", turf);
-
+        if (!turf) {
+            return res.status(404).json({ succuss: false, message: "No turf found for your assigned location" });
+        }
         res.status(200).json({ succuss: true, data: turf });
 
 
@@ -38,45 +41,44 @@ const editTurfDetails = async (req, res) => {
     try {
         const userId = req.user._id;
         const { turfId } = req.params;
-        const assignedLocations = await locationManagerModel.find({ user_id: userId })
+        const assignedLocations = await locationManagerModel.findOne({ user_id: userId })
         //const assignedManager = await locationManagerModel.findOne({ user_id: userId })
-        if (!assignedLocations || assignedLocations.length === 0) {
+        if (!assignedLocations) {
             return res.status(403).json({
                 success: false, message: "Access denied. You are not assigned as a manager to any location."
             });
         }
 
-        const { image, pricePerHead, description } = req.body
+
 
         const existingTurf = await turfModel.findById(turfId);
         if (!existingTurf) {
             return res.status(404).json({ success: false, message: "Turf not found" });
         }
 
-        // Ensure turf's location is in the assigned manager's list
-        const assignedLocationIds = assignedLocations.map(loc => String(loc.location_id));
-        if (!assignedLocationIds.includes(String(existingTurf.location_id))) {
+        // Check if turf belongs to manager's location
+        if (String(existingTurf.location_id) !== String(assignedLocation.location_id)) {
             return res.status(403).json({
                 success: false,
                 message: "Access denied. You are not authorized to edit this turf."
             });
         }
+
+        const { pricePerHead, description } = req.body
+        const updatedFields = { pricePerHead, description }
+
         if (req.file) {
             if (existingTurf.image?.public_id) {
                 await cloudinary.uploader.destroy(existingTurf.image.public_id);
             }
             const cloudinaryRes = await uploadToCloudinary(req.file.path);
-            updateFields.image = cloudinaryRes;
+            updatedFields.image = cloudinaryRes;
         }
         //find the turf and update
         const updatedTurf = await turfModel.findByIdAndUpdate(turfId,
-            { image, pricePerHead, description },
+            updatedFields,
             { new: true, runValidators: true }
-        );
-
-        if (!updatedTurf) {
-            return res.status(404).json({ success: false, message: "Turf not found" });
-        }
+        ).populate('location_id', 'name address');
 
         return res.status(200).json({ success: true, message: "Turf updated successfully", data: updatedTurf });
 
@@ -89,11 +91,59 @@ const editTurfDetails = async (req, res) => {
 // Get all bookings from user
 const getAllBookings = async (req, res) => {
     try {
-        const bookings = await bookingModel.find()
-        res.status(200).json({ succuss: true, data: bookings })
+        const userId = req.user._id;
+        const assignedLocation = await locationManagerModel.findOne({ user_id: userId })
+        if (!assignedLocation) {
+            res.status(404).json({ succuss: false, message: "Access denied. No location assigned." });
+        }
+        const turf = await turfModel.findOne({ location_id: assignedLocation.location_id })
+        if (!turf) {
+            res.status(404).json({ succuss: false, message: "No turf found for your location" });
+        }
+
+        const bookings = await bookingModel.find({ turf_id: turf._id }).populate('user_id', 'name email')
+            .populate('turf_id', 'name').sort({ bookingDate: -1 });
+        res.status(200).json({ succuss: true, data: bookings });
+
     } catch (error) {
         console.log(error);
         res.status(500).json({ succuss: false, message: error.message || "Error fetching bookings", });
+    }
+}
+
+const getManagerPayments = async (req, res) => {
+    try {
+        const userId = req.user._id;
+        const assignedLocation = await locationManagerModel.findOne({ user_id: userId });
+        if (!assignedLocation) {
+            res.status(404).json({ succuss: false, message: "Access denied. No location assigned." });
+        }
+        const turf = await turfModel.findOne({ location_id: assignedLocation.location_id })
+        if (!turf) {
+            res.status(404).json({ succuss: false, message: "No turf found for your location" });
+        }
+        const paidBookings = await bookingModel.find({
+            turf_id: turf._id,
+            booking_Status: "Booked"
+        }).populate('user_id', 'email').populate('turf_id', 'name').sort({ date: -1, time_From: -1 });
+
+        //Transform bookings into payment records
+        const paymentRecords = paidBookings.map(booking => ({
+            _id: booking._id,
+            booking_id: booking._id,
+            turf_name: booking.turfId.name,
+            user_email: booking.userId.email,
+            date: booking.date,
+            time_slot: `${new Date(booking.time_From).toLocaleTimeString()} - ${new Date(booking.time_To).toLocaleTimeString()}`,
+            amount: booking.total_Amount,
+            status: "Paid",
+            payment_date: booking.date
+        }));
+        res.status(200).json({ success: true, data: paymentRecords });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ succuss: false, message: error.message || "Error fetching payments", });
+
     }
 }
 
@@ -114,5 +164,6 @@ module.exports = {
     getAllTurfs,
     editTurfDetails,
     getAllBookings,
-    getAllPayments
+    getAllPayments,
+    getManagerPayments
 }
