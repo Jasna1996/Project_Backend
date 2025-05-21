@@ -37,11 +37,14 @@ const AddManager = async (req, res) => {
                 success: false, message: "This user is already a manager for this location",
             });
 
+        // Update user role to 'manager'
+        await userModel.findByIdAndUpdate(user._id, { role: 'manager' })
+
         const newManager = await managerModel({ location_id: findLocation._id, user_id: user._id });
         const savedManager = await newManager.save();
 
         const result = await managerModel.findById(savedManager._id).populate('location_id', 'name address')
-            .populate('user_id', 'name email');
+            .populate('user_id', 'name email role');
 
         return res.status(201).json({ success: true, message: "Manager assigned successfully", data: result })
 
@@ -83,11 +86,19 @@ const editManager = async (req, res) => {
             });
         }
 
+        // Update roles:
+        //  Set previous manager's role back to 'user'
+        await userModel.findByIdAndUpdate(existingManager.user_id, { role: 'user' });
+
+        //  Set new manager's role to 'manager'
+        await userModel.findByIdAndUpdate(newUser._id, { role: 'manager' });
+
+
         existingManager.user_id = newUser._id;
         const updatedManager = await existingManager.save()
         const update = await locationManagerModel.findById(updatedManager._id)
             .populate('location_id', 'name')
-            .populate('user_id', 'name email');
+            .populate('user_id', 'name email role');
         return res.status(200).json({
             success: true,
             message: "Location Manager updated successfully",
@@ -143,6 +154,10 @@ const deleteManager = async (req, res) => {
         if (!manager) {
             return res.status(404).json({ success: false, message: "Location manager not found" });
         }
+
+        // Revert user role to 'user'
+        await userModel.findByIdAndUpdate(manager.user_id, { role: 'user' });
+
         await locationManagerModel.findByIdAndDelete(id);
         return res.status(200).json({ success: true, message: "Location Manager deleted successfully" });
     } catch (error) {
