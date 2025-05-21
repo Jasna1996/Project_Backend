@@ -192,17 +192,31 @@ const bookings = async (req, res) => {
         if (!date || !time_From || !time_To || !turfName || !email)
             return res.status(400).json({ success: false, message: "Date, time from, time to, email and turf are required" });
 
-        const parseDateTime = (date, time) => {
+        console.log(`Parsing date: ${date}, timeFrom: ${time_From}, timeTo: ${time_To}`);
+        const parseDateTime = (date, timeStr) => {
+            console.log(`Parsing time: ${timeStr}`);
+            const [time, period] = timeStr.split(' ');
             const [hours, minutes] = time.split(":").map(Number);
-            const dateObj = new Date(date);
 
-            dateObj.setHours(hours - 5, minutes - 30);
+            // Convert to 24-hour format
+            if (period === 'PM' && hours !== 12) hours += 12;
+            if (period === 'AM' && hours === 12) hours = 0;
+
+            const dateObj = new Date(date);
+            dateObj.setHours(hours - 5); // Convert IST to UTC
+            dateObj.setMinutes(minutes - 30);
             return dateObj;
         };
 
         const parsedDate = new Date(date);
         const parsedTimeFrom = parseDateTime(date, time_From);
         const parsedTimeTo = parseDateTime(date, time_To);
+
+        console.log("Parsed dates:", {
+            date: parsedDate,
+            timeFrom: parsedTimeFrom,
+            timeTo: parsedTimeTo
+        });
 
         if (isNaN(parsedDate) || isNaN(parsedTimeFrom) || isNaN(parsedTimeTo)) {
             return res.status(400).json({ success: false, message: "Invalid date or time format" });
