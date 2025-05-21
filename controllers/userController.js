@@ -286,12 +286,22 @@ const getUserBookings = async (req, res) => {
                 return d.toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit', hour12: true });
             }
 
+            console.log("Formatted booking:", {
+                ...booking._doc,
+                turf_id: booking.turf_id,
+                formattedDate: new Date(booking.date).toLocaleDateString('en-IN'),
+                formattedTimeFrom: formatTime(booking.time_From),
+                formattedTimeTo: formatTime(booking.time_To)
+            });
             return {
-                ...bookings._doc,
+                ...booking._doc,
+                _id: booking._id,
+                turf_id: booking.turf_id,
                 formattedDate: new Date(booking.date).toLocaleDateString('en-IN'),
                 formattedTimeFrom: formatTime(booking.time_From),
                 formattedTimeTo: formatTime(booking.time_To),
             };
+
         });
 
         res.status(200).json({
