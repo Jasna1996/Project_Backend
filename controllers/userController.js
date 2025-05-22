@@ -10,7 +10,7 @@ const bookingModel = require('../models/bookingModel')
 const signUp = async (req, res) => {
 
     try {
-        const { name, email, phone, password, confirmPassword } = req.body;
+        const { name, email, phone, password, confirmPassword, role } = req.body;
 
         if (!name || !email || !phone || !password || !confirmPassword) {
             return res.status(400).json({ message: "All fields are required!" })
@@ -28,7 +28,7 @@ const signUp = async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt)
 
-        const newUser = new users({ name, email, phone, password: hashedPassword });
+        const newUser = new users({ name, email, phone, password: hashedPassword, role: role || 'user' });
         const saveUser = await newUser.save();
         return res.status(200).json({ message: "User Registered Successfully", user: saveUser })
 
