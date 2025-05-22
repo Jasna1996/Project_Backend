@@ -6,10 +6,17 @@ const { cloudinary } = require('../config/clodinaryConfig');
 const { uploadToCloudinary } = require('../utilities/imageUploader');
 const locationManagerModel = require('../models/locationManagerModel')
 
+
+const getUserId = (req) => {
+    return req.body.userId || req.query.userId || req.headers.userId || null;
+}
 //getting all turfs
 const getAllTurfs = async (req, res) => {
     try {
-        const userId = req.user._id;
+        const userId = getUserId(req);
+
+        if (!userId) return res.status(400).json({ success: false, message: "User ID not provided" });
+
         const assignedLocation = await locationManagerModel.findOne({ user_id: userId }).populate('location_id');
         if (!assignedLocation || !assignedLocation.location_id) {
             return res.status(403).json({
@@ -37,8 +44,10 @@ const getAllTurfs = async (req, res) => {
 //edit turf details
 const editTurfDetails = async (req, res) => {
     try {
-        const userId = req.user._id;
+        const userId = getUserId(req);
         const { turfId } = req.params;
+        if (!userId || !turfId) return res.status(400).json({ success: false, message: "Missing userId or turfId" });
+
         const assignedLocation = await locationManagerModel.findOne({ user_id: userId })
         if (!assignedLocation || !assignedLocation.location_id) {
             return res.status(403).json({
@@ -88,7 +97,9 @@ const editTurfDetails = async (req, res) => {
 // Get all bookings from user
 const getAllBookings = async (req, res) => {
     try {
-        const userId = req.user;
+        const userId = getUserId(req);
+        if (!userId) return res.status(400).json({ success: false, message: "User ID not provided" });
+
         const assignedLocation = await locationManagerModel.findOne({ user_id: userId })
         if (!assignedLocation) {
             res.status(404).json({ succuss: false, message: "Access denied. No location assigned." });
@@ -110,7 +121,9 @@ const getAllBookings = async (req, res) => {
 
 const getManagerPayments = async (req, res) => {
     try {
-        const userId = req.user._id;
+        const userId = getUserId(req);
+        if (!userId) return res.status(400).json({ success: false, message: "User ID not provided" });
+
         const assignedLocation = await locationManagerModel.findOne({ user_id: userId });
         if (!assignedLocation) {
             res.status(404).json({ succuss: false, message: "Access denied. No location assigned." });

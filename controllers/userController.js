@@ -6,6 +6,11 @@ const turfModel = require('../models/turfModel')
 const bookingModel = require('../models/bookingModel')
 
 
+const getUserId = (req) => {
+    return req.body.userId || req.query.userId || req.headers.userId || null;
+}
+
+
 // USER FUNCTIONS
 const signUp = async (req, res) => {
 
@@ -342,7 +347,9 @@ const logout = (req, res) => {
 const changePassword = async (req, res) => {
 
     try {
-        const userId = req.user.id;
+        const userId = getUserId(req);
+        if (!userId) return res.status(400).json({ success: false, message: "User ID not provided" });
+
         const { oldPassword, newPassword } = req.body;
         if (!oldPassword || !newPassword) {
             return res.status(400).json({ message: "Old password and new password are required!" });
