@@ -18,15 +18,13 @@ module.exports = (req, res, next) => {
             return res.status(404).json({ message: "User not verified!" });
         }
 
-        if (verifiedToken.role !== "user") {
-            return res.status(401).json({ message: "Access denied" });
-        }
+
         if (verifiedToken.role !== "manager") {
             return res.status(401).json({ message: "Access denied" });
         }
         // req.user = verifiedToken.id;
         req.user = {
-            id: verifiedToken.id,
+            _id: verifiedToken.id,
             role: verifiedToken.role,
         };
         next();
