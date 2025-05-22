@@ -338,6 +338,38 @@ const logout = (req, res) => {
         res.status(500).json({ success: false, message: "Internal server error" });
     }
 }
+
+const changePassword = async (req, res) => {
+
+    try {
+        const userId = req.user.id;
+        const { oldPassword, newPassword } = req.body;
+        if (!oldPassword || !newPassword) {
+            return res.status(400).json({ message: "Old password and new password are required!" });
+        }
+
+        const user = await users.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: "User not found!" });
+        }
+
+        const isMatch = await bcrypt.compare(oldPassword, user.password);
+        if (!isMatch) {
+            return res.status(400).json({ message: "Old password is incorrect!" });
+        }
+
+        const salt = await bcrypt.genSalt(10);
+        const hashedNewPassword = await bcrypt.hash(newPassword, salt);
+
+        user.password = hashedNewPassword;
+        await user.save();
+        res.status(200).json({ message: "Password changed successfully!" });
+
+    } catch (error) {
+        console.error("Change password error:", error);
+        res.status(500).json({ message: "Failed to change password" });
+    }
+}
 module.exports = {
     signUp,
     login,
@@ -348,5 +380,6 @@ module.exports = {
     logout,
     getUserBookings,
     cancelBooking,
-    getAllUsers
+    getAllUsers,
+    changePassword
 } 

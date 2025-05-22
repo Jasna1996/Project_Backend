@@ -10,21 +10,19 @@ const locationManagerModel = require('../models/locationManagerModel')
 const getAllTurfs = async (req, res) => {
     try {
         const userId = req.user._id;
-        const assignedLocations = await locationManagerModel.find({ user_id: userId }).populate('location_id');
-        //const assignedManager = await locationManagerModel.findOne({ user_id: userId })
-        if (!assignedLocations) {
+        const assignedLocation = await locationManagerModel.findOne({ user_id: userId }).populate('location_id');
+        if (!assignedLocation || !assignedLocation.location_id) {
             return res.status(403).json({
                 success: false, message: "Access denied. You are not assigned as a manager to any location."
             });
         }
-        //Extract all assigned location IDs
-        const locationIds = assignedLocations.map(loc => loc.location_id);
+        const locationId = assignedLocation.location_id._id;
 
         // Get  turf under those locations
-        const turf = await turfModel.findOne({ location_id: assignedLocations.location_id._id })
+        const turf = await turfModel.find({ location_id: locationId })
             .populate('location_id', 'name address');
-        console.log("Fetched Turfs:", turf);
-        if (!turf) {
+
+        if (!turf || turf.length === 0) {
             return res.status(404).json({ succuss: false, message: "No turf found for your assigned location" });
         }
         res.status(200).json({ succuss: true, data: turf });
@@ -41,9 +39,8 @@ const editTurfDetails = async (req, res) => {
     try {
         const userId = req.user._id;
         const { turfId } = req.params;
-        const assignedLocations = await locationManagerModel.findOne({ user_id: userId })
-        //const assignedManager = await locationManagerModel.findOne({ user_id: userId })
-        if (!assignedLocations) {
+        const assignedLocation = await locationManagerModel.findOne({ user_id: userId })
+        if (!assignedLocation || !assignedLocation.location_id) {
             return res.status(403).json({
                 success: false, message: "Access denied. You are not assigned as a manager to any location."
             });
@@ -91,7 +88,7 @@ const editTurfDetails = async (req, res) => {
 // Get all bookings from user
 const getAllBookings = async (req, res) => {
     try {
-        const userId = req.user._id;
+        const userId = req.user;
         const assignedLocation = await locationManagerModel.findOne({ user_id: userId })
         if (!assignedLocation) {
             res.status(404).json({ succuss: false, message: "Access denied. No location assigned." });
@@ -131,8 +128,8 @@ const getManagerPayments = async (req, res) => {
         const paymentRecords = paidBookings.map(booking => ({
             _id: booking._id,
             booking_id: booking._id,
-            turf_name: booking.turfId.name,
-            user_email: booking.userId.email,
+            turf_name: booking.turf_id.name,
+            user_email: booking.user_id.email,
             date: booking.date,
             time_slot: `${new Date(booking.time_From).toLocaleTimeString()} - ${new Date(booking.time_To).toLocaleTimeString()}`,
             amount: booking.total_Amount,
