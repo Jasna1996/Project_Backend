@@ -73,8 +73,20 @@ const login = async (req, res) => {
 
         // Include role in token
         const token = createToken(lUser._id, lUser.role)
+        const userData = {
+            _id: lUser._id,
+            name: lUser.name,
+            email: lUser.email,
+            phone: lUser.phone,
+            role: lUser.role
+        }
 
-        res.cookie("token", token)
+        res.cookie("token", token, {
+            httpOnly: true,
+            sameSite: 'strict',
+            maxAge: 24 * 60 * 60 * 1000
+        })
+
         console.log("Login successful for user:", {
             userId: lUser._id,
             email: lUser.email,
@@ -82,7 +94,7 @@ const login = async (req, res) => {
         });
         res.status(200).json({
             message: "Login successful",
-            user: userObject,
+            user: userData,
             token
         });
 

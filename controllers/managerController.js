@@ -13,7 +13,7 @@ const getUserId = (req) => {
 //getting all turfs
 const getAllTurfs = async (req, res) => {
     try {
-        const userId = getUserId(req);
+        const userId = req.user._id;
 
         if (!userId) return res.status(400).json({ success: false, message: "User ID not provided" });
 
