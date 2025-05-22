@@ -14,6 +14,7 @@ module.exports = (req, res, next) => {
             return res.status(401).json({ error: req.headers.authorization })
         }
         const verifiedToken = jwt.verify(token, process.env.JWT_SECRET)
+        console.log("Decoded token in middleware:", verifiedToken);
         if (!verifiedToken) {
             return res.status(404).json({ message: "User not verified!" });
         }
