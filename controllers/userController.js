@@ -342,6 +342,9 @@ const logout = (req, res) => {
 const changePassword = async (req, res) => {
 
     try {
+        if (!req.user || !req.user.id) {
+            return res.status(401).json({ message: "Unauthorized. User info not found." });
+        }
         const userId = req.user.id;
         const { oldPassword, newPassword } = req.body;
         if (!oldPassword || !newPassword) {
