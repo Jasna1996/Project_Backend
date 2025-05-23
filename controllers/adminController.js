@@ -145,9 +145,6 @@ const deleteManager = async (req, res) => {
             return res.status(404).json({ success: false, message: "Location manager not found" });
         }
 
-        // Revert user role to 'user'
-        await userModel.findByIdAndUpdate(manager.user_id, { role: 'user' });
-
         await locationManagerModel.findByIdAndDelete(id);
         return res.status(200).json({ success: true, message: "Location Manager deleted successfully" });
     } catch (error) {
