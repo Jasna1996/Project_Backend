@@ -7,10 +7,10 @@ const { requireManager } = require('../../middleware/authorizedRole');
 
 const managerRouter = require('express').Router();
 
-managerRouter.get('/turf', authentication, getAllTurfs);
-managerRouter.put('/updateturf/:turfId', editTurfDetails);
-managerRouter.get('/bookings', getAllBookings);
-managerRouter.get('/payments', getManagerPayments);
+managerRouter.get('/turf', protect, getAllTurfs);
+managerRouter.put('/updateturf/:turfId', protect, editTurfDetails);
+managerRouter.get('/bookings', protect, getAllBookings);
+managerRouter.get('/payments', protect, getManagerPayments);
 managerRouter.post('/changepassword', protect, changePassword);
 
 module.exports = { managerRouter }
