@@ -11,7 +11,8 @@ const { AddManager,
 } = require('../../controllers/adminController');
 const { AddLocation, getAllLocations, getLocation, editLocation, deleteLocation }
     = require('../../controllers/locationMasterController');
-const { getAllUsers, signUp } = require('../../controllers/userController');
+const { getAllUsers, signUp, changePassword } = require('../../controllers/userController');
+const authentication = require('../../middleware/authentication');
 
 
 adminRouter.post('/AddLocation', AddLocation);
@@ -27,7 +28,8 @@ adminRouter.delete('/DeleteManager/:id', deleteManager);
 adminRouter.get('/GetAllBookings', getAllBookings);
 adminRouter.get('/GetAllPayments', getAllPayments);
 adminRouter.get('/GetAllUsers', getAllUsers);
-adminRouter.post('/AddManagerUser', signUp)
+adminRouter.post('/AddManagerUser', signUp);
+adminRouter.post("/changepassword", changePassword)
 
 
 module.exports = { adminRouter }
