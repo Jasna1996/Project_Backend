@@ -6,11 +6,6 @@ const turfModel = require('../models/turfModel')
 const bookingModel = require('../models/bookingModel')
 
 
-const getUserId = (req) => {
-    return req.body.userId || req.query.userId || req.headers.userId || null;
-}
-
-
 // USER FUNCTIONS
 const signUp = async (req, res) => {
 
@@ -73,21 +68,8 @@ const login = async (req, res) => {
 
         // Include role in token
         const token = createToken(lUser._id, lUser.role)
-        
-        const userData = {
-            _id: lUser._id,
-            name: lUser.name,
-            email: lUser.email,
-            phone: lUser.phone,
-            role: lUser.role
-        }
 
-        res.cookie("token", token, {
-            httpOnly: true,
-            sameSite: 'strict',
-            maxAge: 24 * 60 * 60 * 1000
-        })
-
+        res.cookie("token", token)
         console.log("Login successful for user:", {
             userId: lUser._id,
             email: lUser.email,
@@ -95,7 +77,7 @@ const login = async (req, res) => {
         });
         res.status(200).json({
             message: "Login successful",
-            user: userData,
+            user: userObject,
             token
         });
 
@@ -360,9 +342,7 @@ const logout = (req, res) => {
 const changePassword = async (req, res) => {
 
     try {
-        const userId = getUserId(req);
-        if (!userId) return res.status(400).json({ success: false, message: "User ID not provided" });
-
+        const userId = req.user.id;
         const { oldPassword, newPassword } = req.body;
         if (!oldPassword || !newPassword) {
             return res.status(400).json({ message: "Old password and new password are required!" });
