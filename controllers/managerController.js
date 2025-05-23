@@ -13,7 +13,7 @@ const getUserId = (req) => {
 //getting all turfs
 const getAllTurfs = async (req, res) => {
     try {
-        const userId = req.user._id;
+        const userId = req.user.id;
 
         if (!userId) return res.status(400).json({ success: false, message: "User ID not provided" });
 
@@ -44,7 +44,7 @@ const getAllTurfs = async (req, res) => {
 //edit turf details
 const editTurfDetails = async (req, res) => {
     try {
-        const userId = req.user._id;
+        const userId = req.user.id;
         const { turfId } = req.params;
         if (!userId || !turfId) return res.status(400).json({ success: false, message: "Missing userId or turfId" });
 
@@ -97,7 +97,7 @@ const editTurfDetails = async (req, res) => {
 // Get all bookings from user
 const getAllBookings = async (req, res) => {
     try {
-        const userId = req.user._id;
+        const userId = req.user.id;
         if (!userId) return res.status(400).json({ success: false, message: "User ID not provided" });
 
         const assignedLocation = await locationManagerModel.findOne({ user_id: userId })
@@ -121,7 +121,7 @@ const getAllBookings = async (req, res) => {
 
 const getManagerPayments = async (req, res) => {
     try {
-        const userId = req.user._id;
+        const userId = req.user.id;
         if (!userId) return res.status(400).json({ success: false, message: "User ID not provided" });
 
         const assignedLocation = await locationManagerModel.findOne({ user_id: userId });
