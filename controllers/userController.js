@@ -367,8 +367,9 @@ const changePassword = async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedNewPassword = await bcrypt.hash(newPassword, salt);
 
-        user.password = hashedNewPassword;
-        await user.save();
+        // user.password = hashedNewPassword;
+        await users.findByIdAndUpdate(userId,
+            { $set: { password: hashedNewPassword } }, { new: true });
         res.status(200).json({ message: "Password changed successfully!" });
 
     } catch (error) {
