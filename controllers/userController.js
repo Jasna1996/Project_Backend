@@ -44,11 +44,13 @@ const login = async (req, res) => {
     try {
 
         const { email, phone, password } = req.body;
+        const role = req.query.role?.toLowerCase() || "user";
 
         if (!email && !phone) {
             return res.status(400).json({ message: 'Please provide either email or phone number' });
         }
         const lUser = await users.findOne({
+            role: role,
             $or: [
                 { email: email || '' },
                 { phone: phone || '' }
@@ -73,6 +75,7 @@ const login = async (req, res) => {
         console.log("Login successful for user:", {
             userId: lUser._id,
             email: lUser.email,
+            role,
             timestamp: new Date().toISOString()
         });
         res.status(200).json({

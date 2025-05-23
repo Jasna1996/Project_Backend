@@ -3,6 +3,7 @@ const express = require('express')
 const userRouter = express.Router();
 const { signUp, login, UserProfile, updateUser, deleteUser, bookings, logout, getUserBookings, cancelBooking, getAllUsers, changePassword } = require('../../controllers/userController');
 const authentication = require('../../middleware/authentication');
+const { protect } = require('../../middleware/authMiddleware');
 
 userRouter.post("/register", signUp);
 userRouter.post("/login", login);
@@ -14,7 +15,7 @@ userRouter.get("/getBookings", getUserBookings);
 userRouter.delete("/cancelBooking/:id", cancelBooking)
 userRouter.post("/logout", logout);
 userRouter.get("/getAllUsers", getAllUsers);
-userRouter.post("/changepassword", changePassword);
+userRouter.post("/changepassword", protect, changePassword);
 
 
 module.exports = { userRouter };

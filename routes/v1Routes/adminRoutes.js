@@ -13,6 +13,7 @@ const { AddLocation, getAllLocations, getLocation, editLocation, deleteLocation 
     = require('../../controllers/locationMasterController');
 const { getAllUsers, signUp, changePassword } = require('../../controllers/userController');
 const authentication = require('../../middleware/authentication');
+const { protect } = require('../../middleware/authMiddleware');
 
 
 adminRouter.post('/AddLocation', AddLocation);
@@ -29,7 +30,7 @@ adminRouter.get('/GetAllBookings', getAllBookings);
 adminRouter.get('/GetAllPayments', getAllPayments);
 adminRouter.get('/GetAllUsers', getAllUsers);
 adminRouter.post('/AddManagerUser', signUp);
-adminRouter.post("/changepassword", changePassword)
+adminRouter.post("/changepassword", protect, changePassword)
 
 
 module.exports = { adminRouter }
