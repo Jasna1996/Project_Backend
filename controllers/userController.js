@@ -233,7 +233,7 @@ const bookings = async (req, res) => {
         }
 
         const existingBooking = await bookingModel.findOne({
-            user_id: userData._id,
+            // user_id: userData._id,
             turf_id: turfData._id,
             date: parsedDate,
             time_From: parsedTimeFrom,
