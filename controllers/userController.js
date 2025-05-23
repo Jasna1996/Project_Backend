@@ -73,6 +73,7 @@ const login = async (req, res) => {
 
         // Include role in token
         const token = createToken(lUser._id, lUser.role)
+        
         const userData = {
             _id: lUser._id,
             name: lUser.name,
