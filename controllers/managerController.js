@@ -20,7 +20,7 @@ const getAllTurfs = async (req, res) => {
         const assignedLocation = await locationManagerModel.findOne({ user_id: userId }).populate('location_id');
         if (!assignedLocation) {
             return res.status(403).json({
-                success: false, message: "Access denied. You are not assigned as a manager to any location."
+                success: false, message: `Access denied. You are not assigned as a manager to any location.${assigneLocation}`
             });
         }
         const locationId = assignedLocation;
