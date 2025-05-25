@@ -18,12 +18,12 @@ const getAllTurfs = async (req, res) => {
         if (!userId) return res.status(400).json({ success: false, message: "User ID not provided" });
 
         const assignedLocation = await locationManagerModel.findOne({ user_id: userId }).populate('location_id');
-        if (!assignedLocation || !assignedLocation.location_id) {
+        if (!assignedLocation) {
             return res.status(403).json({
                 success: false, message: "Access denied. You are not assigned as a manager to any location."
             });
         }
-        const locationId = assignedLocation.location_id._id;
+        const locationId = assignedLocation;
 
         // Get  turf under those locations
         const turf = await turfModel.find({ location_id: locationId })
@@ -49,7 +49,7 @@ const editTurfDetails = async (req, res) => {
         if (!userId || !turfId) return res.status(400).json({ success: false, message: "Missing userId or turfId" });
 
         const assignedLocation = await locationManagerModel.findOne({ user_id: userId })
-        if (!assignedLocation || !assignedLocation.location_id) {
+        if (!assignedLocation) {
             return res.status(403).json({
                 success: false, message: "Access denied. You are not assigned as a manager to any location."
             });
@@ -104,7 +104,7 @@ const getAllBookings = async (req, res) => {
         if (!assignedLocation) {
             res.status(404).json({ succuss: false, message: "Access denied. No location assigned." });
         }
-        const turf = await turfModel.findOne({ location_id: assignedLocation.location_id })
+        const turf = await turfModel.findOne({ location_id: assignedLocation })
         if (!turf) {
             res.status(404).json({ succuss: false, message: "No turf found for your location" });
         }
@@ -128,7 +128,7 @@ const getManagerPayments = async (req, res) => {
         if (!assignedLocation) {
             res.status(404).json({ succuss: false, message: "Access denied. No location assigned." });
         }
-        const turf = await turfModel.findOne({ location_id: assignedLocation.location_id })
+        const turf = await turfModel.findOne({ location_id: assignedLocation })
         if (!turf) {
             res.status(404).json({ succuss: false, message: "No turf found for your location" });
         }
