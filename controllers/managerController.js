@@ -13,14 +13,14 @@ const getUserId = (req) => {
 //getting all turfs
 const getAllTurfs = async (req, res) => {
     try {
-        const userId = new mongoose.Types.ObjectId(req.user.id);
+        const userId = req.user.id;
 
         if (!userId) return res.status(400).json({ success: false, message: "User ID not provided" });
 
         const assignedLocation = await locationManagerModel.findOne({ user_id: userId }).populate('location_id');
         if (!assignedLocation) {
             return res.status(403).json({
-                success: false, message: `Access denied. You are not assigned as a manager to any location.${assignedLocation}`
+                success: false, message: `Access denied. You are not assigned as a manager to any location.${userId}`
             });
         }
         const locationId = assignedLocation;
