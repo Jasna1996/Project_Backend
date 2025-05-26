@@ -44,7 +44,7 @@ const login = async (req, res) => {
     try {
 
         const { email, phone, password } = req.body;
-      
+
         if (!email && !phone) {
             return res.status(400).json({ message: 'Please provide either email or phone number' });
         }
@@ -342,11 +342,13 @@ const logout = (req, res) => {
 const changePassword = async (req, res) => {
 
     try {
+
+        const { userId, oldPassword, newPassword } = req.body;
+
         if (!req.user || !req.user.id) {
             return res.status(401).json({ message: "Unauthorized. User info not found." });
         }
-        const userId = req.user.id;
-        const { oldPassword, newPassword } = req.body;
+        // const userId = req.user.id;
         if (!oldPassword || !newPassword) {
             return res.status(400).json({ message: "Old password and new password are required!" });
         }
