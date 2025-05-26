@@ -7,23 +7,20 @@ const { uploadToCloudinary } = require('../utilities/imageUploader');
 const locationManagerModel = require('../models/locationManagerModel')
 
 
-const getUserId = (req) => {
-    return req.body.userId || req.query.userId || req.headers.userId || null;
-}
 //getting all turfs
 const getAllTurfs = async (req, res) => {
     try {
-        const userId = req.user.id;
+        const { userId } = req.query;
 
         if (!userId) return res.status(400).json({ success: false, message: "User ID not provided" });
 
-        const assignedLocation = await locationManagerModel.findOne({ user_id: userId }).populate('location_id');
+        const assignedLocation = await locationManagerModel.findOne({ user_id: userId });
         if (!assignedLocation) {
             return res.status(403).json({
                 success: false, message: `Access denied. You are not assigned as a manager to any location.${userId}`
             });
         }
-        const locationId = assignedLocation;
+        const locationId = assignedLocation.location_id;
 
         // Get  turf under those locations
         const turf = await turfModel.find({ location_id: locationId })
@@ -44,7 +41,7 @@ const getAllTurfs = async (req, res) => {
 //edit turf details
 const editTurfDetails = async (req, res) => {
     try {
-        const userId = new mongoose.Types.ObjectId(req.user.id);
+        const { userId } = req.query;
         const { turfId } = req.params;
         if (!userId || !turfId) return res.status(400).json({ success: false, message: "Missing userId or turfId" });
 
@@ -97,7 +94,7 @@ const editTurfDetails = async (req, res) => {
 // Get all bookings from user
 const getAllBookings = async (req, res) => {
     try {
-        const userId = new mongoose.Types.ObjectId(req.user.id);
+        const { userId } = req.query;
         if (!userId) return res.status(400).json({ success: false, message: "User ID not provided" });
 
         const assignedLocation = await locationManagerModel.findOne({ user_id: userId })
@@ -121,7 +118,7 @@ const getAllBookings = async (req, res) => {
 
 const getManagerPayments = async (req, res) => {
     try {
-        const userId = new mongoose.Types.ObjectId(req.user.id);
+        const { userId } = req.query;
         if (!userId) return res.status(400).json({ success: false, message: "User ID not provided" });
 
         const assignedLocation = await locationManagerModel.findOne({ user_id: userId });
