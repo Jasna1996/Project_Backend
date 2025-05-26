@@ -10,7 +10,7 @@ const locationManagerModel = require('../models/locationManagerModel')
 //getting all turfs
 const getAllTurfs = async (req, res) => {
     try {
-        const { userId } = req.query;
+        const userId = req.user.id;
 
         if (!userId) return res.status(400).json({ success: false, message: "User ID not provided" });
 
